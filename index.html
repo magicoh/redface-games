@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Ensure responsiveness -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redface Games</title>
+  <style>
+    /* Reset & Global Styles */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-sizing: border-box;
+      padding: 20px;
+    }
+    header, footer {
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+    }
+    header {
+      background-color: #b30000;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    footer {
+      background-color: #333;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+    main {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+    }
+    /* Intro Section */
+    .intro {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .intro h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    .intro p {
+      font-size: 1.2rem;
+      line-height: 1.5;
+    }
+    /* Carousel Section */
+    .games {
+      margin: 30px 0;
+    }
+    .games h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+    .carousel-track-container {
+      overflow: hidden;
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .carousel-item {
+      min-width: 250px;
+      margin: 0 10px;
+      background: #222;
+      border: 2px solid #b30000;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .carousel-item img {
+      width: 100%;
+      display: block;
+    }
+    .game-info {
+      padding: 10px;
+    }
+    .game-info h3 {
+      margin: 0 0 5px;
+      font-size: 1.3rem;
+    }
+    .game-info p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    /* Carousel Controls */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(179, 0, 0, 0.8);
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      padding: 10px;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .carousel-btn:hover {
+      background: rgba(179, 0, 0, 1);
+    }
+    .prev {
+      left: 5px;
+    }
+    .next {
+      right: 5px;
+    }
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .carousel-item {
+        min-width: 200px;
+      }
+      .intro h1 {
+        font-size: 2rem;
+      }
+      .intro p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    Redface Games
+  </header>
+  <main>
+    <section class="intro">
+      <h1>Welcome to Redface Games</h1>
+      <p>This is a site dedicated to exploring game making. Here, you'll find our creative process and prototypes for exciting games. Stay tuned as we build a collection of engaging experiences!</p>
+    </section>
+    <section class="games">
+      <h2>Our Games</h2>
+      <div class="carousel">
+        <button class="carousel-btn prev">&#10094;</button>
+        <div class="carousel-track-container">
+          <ul class="carousel-track">
+            <!-- Game items will be inserted here dynamically -->
+          </ul>
+        </div>
+        <button class="carousel-btn next">&#10095;</button>
+      </div>
+    </section>
+  </main>
+  <footer>
+    &copy; 2025 Redface Games. All rights reserved.
+  </footer>
+  <script>
+    // Structured data for games (an array of objects)
+    const games = [
+      { title: "Space Invaders Redux", description: "A modern twist on the classic space shooter.", image: "https://via.placeholder.com/250x150/FF5733/FFFFFF?text=Space+Invaders" },
+      { title: "Dungeon Crawler", description: "Explore treacherous dungeons and defeat fearsome foes.", image: "https://via.placeholder.com/250x150/900C3F/FFFFFF?text=Dungeon+Crawler" },
+      { title: "Puzzle Master", description: "Test your wits with challenging puzzles.", image: "https://via.placeholder.com/250x150/581845/FFFFFF?text=Puzzle+Master" },
+      { title: "Racing Thunder", description: "Speed through tracks and beat your best time.", image: "https://via.placeholder.com/250x150/FFC300/000000?text=Racing+Thunder" },
+      { title: "Mystery Manor", description: "Uncover secrets in a haunted mansion.", image: "https://via.placeholder.com/250x150/C70039/FFFFFF?text=Mystery+Manor" }
+    ];
+    
+    // Populate the carousel with game items
+    const carouselTrack = document.querySelector('.carousel-track');
+    games.forEach(game => {
+      const li = document.createElement('li');
+      li.className = 'carousel-item';
+      li.innerHTML = `
+        <img src="${game.image}" alt="${game.title}">
+        <div class="game-info">
+          <h3>${game.title}</h3>
+          <p>${game.description}</p>
+        </div>
+      `;
+      carouselTrack.appendChild(li);
+    });
+    
+    // Carousel functionality
+    const prevButton = document.querySelector('.prev');
+    const nextButton = document.querySelector('.next');
+    let currentIndex = 0;
+    
+    // Ensure we measure item width after images load
+    function getItemWidth() {
+      const item = document.querySelector('.carousel-item');
+      return item ? item.getBoundingClientRect().width + 20 : 270; // including margin
+    }
+    
+    function moveToSlide(index) {
+      const itemWidth = getItemWidth();
+      carouselTrack.style.transform = 'translateX(-' + (itemWidth * index) + 'px)';
+    }
+    
+    nextButton.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % games.length;
+      moveToSlide(currentIndex);
+    });
+    
+    prevButton.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + games.length) % games.length;
+      moveToSlide(currentIndex);
+    });
+    
+    // Optional: Auto-play the carousel every 5 seconds
+    // setInterval(() => {
+    //   currentIndex = (currentIndex + 1) % games.length;
+    //   moveToSlide(currentIndex);
+    // }, 5000);
+  </script>
+</body>
+</html>
