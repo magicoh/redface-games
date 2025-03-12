@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Whack-a-Trump & Baby</title>
+  <title>Whack-a-Mole & Baby</title>
   <style>
     /* Basic Reset */
     * {
@@ -93,30 +93,28 @@
   </style>
 </head>
 <body>
-  <h1>Whack-a-Trump & Baby</h1>
+  <h1>Whack-a-Mole & Baby</h1>
   <div class="instructions">
-    <p>Hit the silly Donald Trump to <strong>gain 1 point</strong>. Avoid the cute baby, which will <strong>subtract 1 point</strong> if hit!</p>
+    <p>Hit the obvious mole to <strong>gain 1 point</strong>. Avoid the cute baby, which will <strong>subtract 1 point</strong> if hit!</p>
     <div class="instruction-item">
-      <!-- Trump SVG Preview -->
+      <!-- Mole SVG Preview -->
       <svg width="40" height="40" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <!-- Face -->
-        <circle cx="100" cy="100" r="80" fill="orange"/>
-        <!-- Hair -->
-        <path d="M20,60 Q100,10 180,60 Q150,30 100,40 Q50,30 20,60" fill="#FFD700"/>
+        <!-- Mole Body -->
+        <ellipse cx="100" cy="110" rx="70" ry="50" fill="#8B4513"/>
+        <!-- Nose -->
+        <ellipse cx="100" cy="90" rx="20" ry="12" fill="#000"/>
         <!-- Eyes -->
-        <circle cx="70" cy="80" r="15" fill="#FFFFFF" />
-        <circle cx="70" cy="80" r="7" fill="#000"/>
-        <circle cx="130" cy="80" r="15" fill="#FFFFFF" />
-        <circle cx="130" cy="80" r="7" fill="#000"/>
-        <!-- Mouth: small dark circle -->
-        <circle cx="100" cy="140" r="5" fill="#000"/>
-        <!-- Tie -->
-        <polygon points="100,100 90,140 110,140" fill="red"/>
-        <!-- Eyebrows -->
-        <path d="M55,65 Q70,55 85,65" stroke="#000" stroke-width="3" fill="none"/>
-        <path d="M115,65 Q130,55 145,65" stroke="#000" stroke-width="3" fill="none"/>
+        <circle cx="80" cy="80" r="8" fill="#FFF"/>
+        <circle cx="120" cy="80" r="8" fill="#FFF"/>
+        <circle cx="80" cy="80" r="4" fill="#000"/>
+        <circle cx="120" cy="80" r="4" fill="#000"/>
+        <!-- Whiskers -->
+        <line x1="50" y1="90" x2="30" y2="85" stroke="#000" stroke-width="2"/>
+        <line x1="50" y1="100" x2="30" y2="105" stroke="#000" stroke-width="2"/>
+        <line x1="150" y1="90" x2="170" y2="85" stroke="#000" stroke-width="2"/>
+        <line x1="150" y1="100" x2="170" y2="105" stroke="#000" stroke-width="2"/>
       </svg>
-      <span>Hit Trump for +1 point</span>
+      <span>Hit Mole for +1 point</span>
     </div>
     <div class="instruction-item">
       <!-- Baby SVG Preview -->
@@ -166,25 +164,23 @@
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
 
-    // Inline SVG for a silly cartoon Donald Trump with an orange face and a small dark circle for a mouth.
-    const trumpSVG = `
+    // Inline SVG for an obvious cartoon mole.
+    const moleSVG = `
       <svg width="80" height="80" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <!-- Face -->
-        <circle cx="100" cy="100" r="80" fill="orange"/>
-        <!-- Hair -->
-        <path d="M20,60 Q100,10 180,60 Q150,30 100,40 Q50,30 20,60" fill="#FFD700"/>
+        <!-- Mole Body -->
+        <ellipse cx="100" cy="110" rx="70" ry="50" fill="#8B4513"/>
+        <!-- Nose -->
+        <ellipse cx="100" cy="90" rx="20" ry="12" fill="#000"/>
         <!-- Eyes -->
-        <circle cx="70" cy="80" r="15" fill="#FFFFFF" />
-        <circle cx="70" cy="80" r="7" fill="#000"/>
-        <circle cx="130" cy="80" r="15" fill="#FFFFFF" />
-        <circle cx="130" cy="80" r="7" fill="#000"/>
-        <!-- Mouth: small dark circle -->
-        <circle cx="100" cy="140" r="5" fill="#000"/>
-        <!-- Tie -->
-        <polygon points="100,100 90,140 110,140" fill="red"/>
-        <!-- Eyebrows -->
-        <path d="M55,65 Q70,55 85,65" stroke="#000" stroke-width="3" fill="none"/>
-        <path d="M115,65 Q130,55 145,65" stroke="#000" stroke-width="3" fill="none"/>
+        <circle cx="80" cy="80" r="8" fill="#FFF"/>
+        <circle cx="120" cy="80" r="8" fill="#FFF"/>
+        <circle cx="80" cy="80" r="4" fill="#000"/>
+        <circle cx="120" cy="80" r="4" fill="#000"/>
+        <!-- Whiskers -->
+        <line x1="50" y1="90" x2="30" y2="85" stroke="#000" stroke-width="2"/>
+        <line x1="50" y1="100" x2="30" y2="105" stroke="#000" stroke-width="2"/>
+        <line x1="150" y1="90" x2="170" y2="85" stroke="#000" stroke-width="2"/>
+        <line x1="150" y1="100" x2="170" y2="105" stroke="#000" stroke-width="2"/>
       </svg>
     `;
 
@@ -222,20 +218,20 @@
       return hole;
     }
 
-    // Show a character (Trump or baby) in a random hole for a random duration.
+    // Show a character (mole or baby) in a random hole for a random duration.
     function showCharacter() {
       const time = randomTime(500, 1500);
       const hole = randomHole(holes);
       const character = hole.querySelector('.character');
 
-      // 80% chance to show Trump, 20% chance to show baby.
+      // 80% chance to show mole, 20% chance to show baby.
       const isBaby = Math.random() < 0.2;
       if (isBaby) {
         character.innerHTML = babySVG;
         character.setAttribute('data-type', 'baby');
       } else {
-        character.innerHTML = trumpSVG;
-        character.setAttribute('data-type', 'trump');
+        character.innerHTML = moleSVG;
+        character.setAttribute('data-type', 'mole');
       }
 
       character.classList.add('up');
@@ -250,7 +246,7 @@
     function hit(e) {
       if (!e.isTrusted) return; // ignore fake clicks
       const type = this.getAttribute('data-type');
-      if (type === 'trump') {
+      if (type === 'mole') {
         score++;
       } else if (type === 'baby') {
         score--;
@@ -267,7 +263,7 @@
     // Delegate events for dynamically populated characters.
     document.getElementById('gameContainer').addEventListener('click', function(e) {
       if (e.target.closest('.character')) {
-        // The hit() function is triggered by the individual element.
+        // hit() is triggered by the element.
       }
     });
 
@@ -286,7 +282,6 @@
 
     // Event listener for the start game button.
     startBtn.addEventListener('click', () => {
-      // Disable the start button until game over.
       startBtn.disabled = true;
       startGame();
       // Re-enable the start button after game duration.
@@ -298,7 +293,6 @@
     // Reset game when reset button is clicked.
     resetBtn.addEventListener('click', () => {
       timeUp = true;
-      // Re-enable the start button immediately.
       startBtn.disabled = false;
       setTimeout(() => {
         score = 0;
