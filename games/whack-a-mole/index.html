@@ -40,7 +40,6 @@
     .scoreboard {
       font-size: 1.5em;
       margin-bottom: 20px;
-      text-align: center;
     }
     .game-container {
       display: grid;
@@ -96,7 +95,7 @@
 <body>
   <h1>Whack-a-Mole & Baby</h1>
   <div class="instructions">
-    <p>Hit the obvious mole to <strong>gain 1 point</strong> and track your moles hit. Avoid the cute baby, which will <strong>subtract 1 point</strong> (tracked separately) if hit!</p>
+    <p>Hit the obvious mole to <strong>gain 1 point</strong>. Avoid the cute baby, which will <strong>subtract 1 point</strong> if hit!</p>
     <div class="instruction-item">
       <!-- Mole SVG Preview -->
       <svg width="40" height="40" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -137,9 +136,7 @@
     </div>
   </div>
   <div class="scoreboard">
-    <p>Moles Hit: <span id="molesHit">0</span></p>
-    <p>Babies Hit: <span id="babiesHit">0</span></p>
-    <p>Score Ratio (Moles:Babies): <span id="scoreRatio">0 : 0</span></p>
+    Score: <span id="score">0</span>
   </div>
   <div class="game-container" id="gameContainer">
     <!-- 9 holes -->
@@ -159,16 +156,10 @@
   </div>
   <script>
     let score = 0;
-    let molesHit = 0;
-    let babiesHit = 0;
     let currentHole = null;
     let timeUp = false;
     const gameDuration = 30000; // game lasts 30 seconds
-
-    const molesHitEl = document.getElementById('molesHit');
-    const babiesHitEl = document.getElementById('babiesHit');
-    const scoreRatioEl = document.getElementById('scoreRatio');
-
+    const scoreDisplay = document.getElementById('score');
     const holes = document.querySelectorAll('.hole');
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
@@ -211,7 +202,7 @@
       </svg>
     `;
 
-    // Returns a random time (in ms) between min and max.
+    // Return a random time between min and max (ms)
     function randomTime(min, max) {
       return Math.round(Math.random() * (max - min) + min);
     }
@@ -225,14 +216,6 @@
       }
       currentHole = hole;
       return hole;
-    }
-
-    // Update the visual tracking of moles hit, babies hit, and the ratio.
-    function updateScoreboard() {
-      molesHitEl.textContent = molesHit;
-      babiesHitEl.textContent = babiesHit;
-      // Display ratio as "moles : babies"
-      scoreRatioEl.textContent = molesHit + " : " + babiesHit;
     }
 
     // Show a character (mole or baby) in a random hole for a random duration.
@@ -252,7 +235,7 @@
       }
 
       character.classList.add('up');
-      // Remove character after a random duration, then recursively show another.
+      // Remove after a random duration, then call showCharacter recursively if game is still on.
       setTimeout(() => {
         character.classList.remove('up');
         if (!timeUp) showCharacter();
@@ -264,11 +247,11 @@
       if (!e.isTrusted) return; // ignore fake clicks
       const type = this.getAttribute('data-type');
       if (type === 'mole') {
-        molesHit++;
+        score++;
       } else if (type === 'baby') {
-        babiesHit++;
+        score--;
       }
-      updateScoreboard();
+      scoreDisplay.textContent = score;
       this.classList.remove('up');
     }
 
@@ -286,19 +269,16 @@
 
     // Start the game.
     function startGame() {
-      // Reset counters.
       score = 0;
-      molesHit = 0;
-      babiesHit = 0;
-      updateScoreboard();
+      scoreDisplay.textContent = score;
       timeUp = false;
       showCharacter();
-      // End game after the set duration.
+      // End game after a set duration.
       setTimeout(() => {
         timeUp = true;
-        alert("Time's up! Your final ratio is " + molesHit + " : " + babiesHit);
+        alert("Time's up! Your final score is: " + score);
       }, gameDuration);
-    }a
+    }
 
     // Event listener for the start game button.
     startBtn.addEventListener('click', () => {
@@ -315,9 +295,8 @@
       timeUp = true;
       startBtn.disabled = false;
       setTimeout(() => {
-        molesHit = 0;
-        babiesHit = 0;
-        updateScoreboard();
+        score = 0;
+        scoreDisplay.textContent = score;
       }, 500);
     });
   </script>
