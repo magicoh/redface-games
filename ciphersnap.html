@@ -88,7 +88,7 @@
       white-space: pre-line;
       margin: 10px 0;
     }
-    /* Main buttons (Play and Help) */
+    /* Main buttons (Play, Help) */
     .button-group {
       display: flex;
       flex-wrap: wrap;
@@ -146,6 +146,11 @@
       justify-content: center;
       margin-top: 15px;
     }
+    /* Share button */
+    #shareBtn {
+      margin-top: 15px;
+      display: none;
+    }
     /* Dev links styling */
     .dev-links {
       margin-top: 20px;
@@ -193,7 +198,8 @@
       <button id="playBtn">Play</button>
       <button id="helpBtn">Help</button>
     </div>
-    <!-- Dev links will be appended here if in dev mode -->
+    <button id="shareBtn">Share Results</button>
+    <!-- Dev links will appear here in dev mode -->
     <div id="devLinks" class="dev-links"></div>
   </div>
 
@@ -241,10 +247,8 @@
     // Determine which cipher to load.
     let cipher;
     if (selectedCipherIndex !== null && !isNaN(selectedCipherIndex)) {
-      // Use the cipher from the query parameter (adjust index if needed)
       cipher = cipherPool[(selectedCipherIndex - 1) % cipherPool.length];
     } else {
-      // Default to "cipher of the day"
       const day = new Date().getDate();
       cipher = cipherPool[day % cipherPool.length];
     }
@@ -264,6 +268,7 @@
     const defineBtn = document.getElementById("defineBtn");
     const revealBtn = document.getElementById("revealBtn");
     const checkBtn = document.getElementById("checkBtn");
+    const shareBtn = document.getElementById("shareBtn");
     const devLinksDiv = document.getElementById("devLinks");
 
     let startTime = null;
@@ -276,24 +281,24 @@
     let definitionUsed = false;
 
     // Prevent multiple plays per day.
-    const alreadyPlayed = localStorage.getItem("cipherPlayed") === new Date().toDateString();
-    if (alreadyPlayed && !devMode) {
+    const playedToday = localStorage.getItem("cipherPlayed") === new Date().toDateString();
+    if (playedToday && !devMode) {
       cipherDisplay.innerText = "Come back tomorrow for a new cipher!";
       playBtn.disabled = true;
     }
 
     playBtn.addEventListener("click", startGame);
 
-    // Show Help modal.
+    // Show the Help modal.
     helpBtn.addEventListener("click", () => {
       helpModal.style.display = "flex";
     });
-    // Close Help modal.
+    // Close the Help modal.
     closeHelpBtn.addEventListener("click", () => {
       helpModal.style.display = "none";
     });
 
-    // Hint button: show next clue (up to 3). After 3, disable hint button.
+    // Modal button behaviors:
     hintBtn.addEventListener("click", () => {
       if (hintCount < maxHints) {
         alert(`Clue: ${cipher.clues[hintCount].toUpperCase()}`);
@@ -306,7 +311,6 @@
       }
     });
 
-    // Reveal Letter button: fills in one random missing letter (only once).
     revealLetterBtn.addEventListener("click", () => {
       if (!revealLetterUsed) {
         const inputs = document.querySelectorAll(".char-box");
@@ -326,7 +330,6 @@
       }
     });
 
-    // Define Cipher button: shows definition and applies a 20% score penalty.
     defineBtn.addEventListener("click", () => {
       let definition = "";
       if (cipher.cipherType.includes("Caesar")) {
@@ -345,16 +348,14 @@
       defineBtn.disabled = true;
     });
 
-    // Reveal Answer button: fills in all letters and ends the game with score 0.
     revealBtn.addEventListener("click", () => {
       alert(`The answer is: ${cipher.solution.toUpperCase()}`);
       endGame(true, 0, true);
     });
 
-    // Check Letters button: highlights correct/incorrect letters for 5 seconds.
     checkBtn.addEventListener("click", revealLetterStatus);
 
-    // Enable/disable Check Letters button based on whether any letter is entered.
+    // Enable/disable Check Letters button.
     function updateCheckBtnState() {
       const inputs = document.querySelectorAll(".char-box");
       let anyEntered = false;
@@ -388,17 +389,25 @@
       }, 1000);
     }
 
-    // Attach backspace behavior to inputs:
-    function attachBackspaceHandler(input, inputsArray, index) {
+    // Helper function to auto-focus the next empty input.
+    function focusNextEmpty(inputs, currentIndex) {
+      for (let i = currentIndex + 1; i < inputs.length; i++) {
+        if (!inputs[i].value) {
+          inputs[i].focus();
+          return;
+        }
+      }
+    }
+
+    // Attach backspace behavior to an input.
+    function attachBackspaceHandler(input, inputs, index) {
       input.addEventListener("keydown", function(e) {
         if (e.key === "Backspace") {
           if (this.value !== "") {
-            // Clear the current value.
             this.value = "";
             e.preventDefault();
           } else if (index > 0) {
-            // Move focus to the previous input.
-            inputsArray[index - 1].focus();
+            inputs[index - 1].focus();
             e.preventDefault();
           }
         }
@@ -421,7 +430,6 @@
       defineBtn.innerText = "Define Cipher (-20% score)";
       revealLetterBtn.disabled = false;
       checkBtn.innerText = "Check Letters";
-      
       // Build the input area by grouping letters per word.
       const words = cipher.solution.split(' ');
       words.forEach((word, wordIndex) => {
@@ -432,11 +440,9 @@
           input.maxLength = 1;
           input.className = 'char-box';
           input.setAttribute('aria-label', 'Letter');
-          // Force uppercase on input.
           input.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
           });
-          // Auto-clear on manual focus.
           input.addEventListener('focus', function() {
             this.value = "";
           });
@@ -449,12 +455,13 @@
           inputArea.appendChild(spacer);
         }
       });
-      // Attach backspace behavior to each input.
+      // Attach event listeners and backspace behavior.
       const inputs = Array.from(document.querySelectorAll(".char-box"));
       inputs.forEach((input, i) => {
         attachBackspaceHandler(input, inputs, i);
         input.addEventListener('input', () => {
-          if (i < inputs.length - 1) inputs[i + 1].focus();
+          // Auto-focus: skip to next empty box.
+          focusNextEmpty(inputs, i);
           checkAnswer(inputs);
           updateCheckBtnState();
         });
@@ -471,7 +478,9 @@
     }
 
     function checkAnswer(inputs) {
-      const userAnswer = Array.from(inputs).map(input => input.value.toUpperCase()).join("");
+      const userAnswer = Array.from(inputs)
+        .map(input => input.value.toUpperCase())
+        .join("");
       if (userAnswer === cipher.solution.replace(/ /g, '')) {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         let score = Math.max(100 - elapsed - totalPenalty, 0);
@@ -492,11 +501,29 @@
       if (giveUp) score = 0;
       if (win) {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const hintsUsed = (hintCount > 0 || definitionUsed || revealLetterUsed) ? "YES" : "NO";
-        endMessage.innerText = `🎉 YOU WIN! SCORE: ${score}\nTIME: ${elapsed} SECONDS\nHINTS USED: ${hintsUsed}`;
+        let hintMsg = "";
+        if (hintCount > 0 || definitionUsed || revealLetterUsed) {
+          hintMsg = `I didn't know what ${cipher.cipherType} was and needed ${hintCount} hint${hintCount === 1 ? "" : "s"} to solve!`;
+        } else {
+          hintMsg = `I solved the ${cipher.cipherType} cipher with no hints!`;
+        }
+        endMessage.innerText = `🎉 YOU WIN! SCORE: ${score}\nTIME: ${elapsed} SECONDS\n${hintMsg}`;
       } else {
         endMessage.innerText = `GAME OVER! THE ANSWER WAS: ${cipher.solution.toUpperCase()}`;
       }
+      shareBtn.style.display = "inline-block";
+      shareBtn.onclick = () => {
+        let shareText = "";
+        if (hintCount > 0 || definitionUsed || revealLetterUsed) {
+          shareText = `I didn't know what ${cipher.cipherType} was and needed ${hintCount} hint${hintCount === 1 ? "" : "s"} to solve CipherSnap!`;
+        } else {
+          shareText = `I solved the ${cipher.cipherType} cipher on CipherSnap with no hints!`;
+        }
+        shareText += ` Try today's puzzle: http://redface.matthew-d-miller.com/ciphersnap.html`;
+        navigator.clipboard.writeText(shareText).then(() => {
+          alert("Results copied to clipboard!");
+        });
+      };
     }
 
     // If in dev mode, list available cipher links.
