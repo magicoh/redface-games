@@ -9,8 +9,7 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      overflow-y: auto;
+      min-height: 100%;
       font-family: sans-serif;
     }
     /* Main container for content */
@@ -18,6 +17,9 @@
       box-sizing: border-box;
       padding: 10px;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
       text-align: center;
@@ -74,12 +76,20 @@
       text-transform: uppercase;
       margin: 10px 0;
     }
-    /* Main buttons (Play and Help) in the main view */
-    .main-buttons {
+    #endMessage {
+      text-align: center;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      white-space: pre-line;
+      margin: 10px;
+    }
+    /* Main buttons in the main view */
+    .button-group {
       display: flex;
-      justify-content: center;
+      flex-wrap: wrap;
       gap: 1rem;
-      margin: 10px 0;
+      margin: 20px 0; /* Spacing from last content element */
+      justify-content: center;
     }
     button {
       padding: 0.5rem 1rem;
@@ -98,13 +108,6 @@
     button:disabled {
       background: #aaa;
       cursor: not-allowed;
-    }
-    #endMessage {
-      text-align: center;
-      font-size: 1.2rem;
-      text-transform: uppercase;
-      white-space: pre-line;
-      margin: 10px;
     }
     /* Modal overlay for Help options */
     .modal {
@@ -169,7 +172,7 @@
     <div id="inputArea"></div>
     <div id="timer">⏱️ 0s</div>
     <div id="endMessage"></div>
-    <div class="main-buttons">
+    <div class="button-group">
       <button id="playBtn">Play</button>
       <button id="helpBtn">Help</button>
     </div>
@@ -192,7 +195,6 @@
   </div>
 
   <script>
-    // Developer mode flag (if present in URL)
     const devMode = window.location.search.includes('dev');
 
     // Updated cipher pool.
@@ -218,7 +220,7 @@
     const helpBtn = document.getElementById("helpBtn");
     const helpModal = document.getElementById("helpModal");
     const closeHelpBtn = document.getElementById("closeHelpBtn");
-    // Help modal buttons.
+    // Modal help buttons.
     const hintBtn = document.getElementById("hint");
     const defineBtn = document.getElementById("defineBtn");
     const revealBtn = document.getElementById("revealBtn");
@@ -238,7 +240,7 @@
       playBtn.disabled = true;
     }
 
-    // Event listener: Start game.
+    // Start game on Play button click.
     playBtn.addEventListener("click", startGame);
 
     // Show the Help modal.
@@ -250,7 +252,7 @@
       helpModal.style.display = "none";
     });
 
-    // Help modal button behaviors:
+    // Modal button behaviors.
     hintBtn.addEventListener("click", () => {
       if (hintCount === 0) {
         alert(`Clue: ${cipher.plainClue.toUpperCase()}`);
@@ -339,7 +341,6 @@
       }, 1000);
     }
 
-    // Start the game: build input area and start timer.
     function startGame() {
       cipherDisplay.innerText = cipher.cipherText;
       inputArea.innerHTML = "";
@@ -348,12 +349,12 @@
       totalPenalty = 0;
       lastLetterHintTime = 0;
       definitionUsed = false;
-      // Reset help modal buttons.
       hintBtn.innerText = "Hint (-0 pts)";
       defineBtn.disabled = false;
       defineBtn.innerText = "Define Cipher (-20% score)";
       checkBtn.innerText = "Check Letters";
 
+      // Build input area by grouping letters by word.
       const words = cipher.solution.split(' ');
       words.forEach((word, wordIndex) => {
         const wordContainer = document.createElement('div');
@@ -363,11 +364,9 @@
           input.maxLength = 1;
           input.className = 'char-box';
           input.setAttribute('aria-label', 'Letter');
-          // Force uppercase.
           input.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
           });
-          // Auto-clear on manual focus.
           input.addEventListener('focus', function() {
             this.value = "";
           });
@@ -400,7 +399,9 @@
     }
 
     function checkAnswer(inputs) {
-      const userAnswer = Array.from(inputs).map(input => input.value.toUpperCase()).join("");
+      const userAnswer = Array.from(inputs)
+        .map(input => input.value.toUpperCase())
+        .join("");
       if (userAnswer === cipher.solution.replace(/ /g, '')) {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         let score = Math.max(100 - elapsed - totalPenalty, 0);
