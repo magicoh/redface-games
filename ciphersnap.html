@@ -199,7 +199,6 @@
       <button id="helpBtn">Help</button>
     </div>
     <button id="shareBtn">Share Results</button>
-    <!-- Dev links will appear here in dev mode -->
     <div id="devLinks" class="dev-links"></div>
   </div>
 
@@ -389,7 +388,7 @@
       }, 1000);
     }
 
-    // Helper function to auto-focus the next empty input.
+    // Helper function: auto-focus the next empty input (skips filled boxes).
     function focusNextEmpty(inputs, currentIndex) {
       for (let i = currentIndex + 1; i < inputs.length; i++) {
         if (!inputs[i].value) {
@@ -430,6 +429,7 @@
       defineBtn.innerText = "Define Cipher (-20% score)";
       revealLetterBtn.disabled = false;
       checkBtn.innerText = "Check Letters";
+      
       // Build the input area by grouping letters per word.
       const words = cipher.solution.split(' ');
       words.forEach((word, wordIndex) => {
@@ -455,7 +455,7 @@
           inputArea.appendChild(spacer);
         }
       });
-      // Attach event listeners and backspace behavior.
+      // Attach backspace behavior and auto-focus for inputs.
       const inputs = Array.from(document.querySelectorAll(".char-box"));
       inputs.forEach((input, i) => {
         attachBackspaceHandler(input, inputs, i);
@@ -478,9 +478,7 @@
     }
 
     function checkAnswer(inputs) {
-      const userAnswer = Array.from(inputs)
-        .map(input => input.value.toUpperCase())
-        .join("");
+      const userAnswer = Array.from(inputs).map(input => input.value.toUpperCase()).join("");
       if (userAnswer === cipher.solution.replace(/ /g, '')) {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         let score = Math.max(100 - elapsed - totalPenalty, 0);
@@ -499,18 +497,24 @@
       playBtn.disabled = true;
       if (!devMode) localStorage.setItem("cipherPlayed", new Date().toDateString());
       if (giveUp) score = 0;
+      let elapsed = Math.floor((Date.now() - startTime) / 1000);
+      let hintText = "";
+      if (hintCount > 0 || definitionUsed || revealLetterUsed) {
+        hintText = `Used ${hintCount} hint${hintCount === 1 ? "" : "s"} and didn't know what ${cipher.cipherType} was.`;
+      } else {
+        hintText = `Used no hints.`;
+      }
+      // Format ending message as bullet points.
       if (win) {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        let hintMsg = "";
-        if (hintCount > 0 || definitionUsed || revealLetterUsed) {
-          hintMsg = `I didn't know what ${cipher.cipherType} was and needed ${hintCount} hint${hintCount === 1 ? "" : "s"} to solve!`;
-        } else {
-          hintMsg = `I solved the ${cipher.cipherType} cipher with no hints!`;
-        }
-        endMessage.innerText = `🎉 YOU WIN! SCORE: ${score}\nTIME: ${elapsed} SECONDS\n${hintMsg}`;
+        endMessage.innerText = 
+`• SCORE: ${score} POINTS
+• TIME: ${elapsed} SECONDS
+• HINTS: ${hintCount}
+• ${hintText}`;
       } else {
         endMessage.innerText = `GAME OVER! THE ANSWER WAS: ${cipher.solution.toUpperCase()}`;
       }
+      // Set up Share button.
       shareBtn.style.display = "inline-block";
       shareBtn.onclick = () => {
         let shareText = "";
@@ -519,9 +523,9 @@
         } else {
           shareText = `I solved the ${cipher.cipherType} cipher on CipherSnap with no hints!`;
         }
-        shareText += ` Try today's puzzle: http://redface.matthew-d-miller.com/ciphersnap.html`;
+        shareText += `\nTry today's puzzle: http://redface.matthew-d-miller.com/ciphersnap.html`;
         navigator.clipboard.writeText(shareText).then(() => {
-          alert("Results copied to clipboard!");
+          shareBtn.innerText = "COPIED TO CLIPBOARD";
         });
       };
     }
