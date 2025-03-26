@@ -5,20 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CipherSnap</title>
   <style>
-    /* Ensure the page occupies the full viewport without scrolling */
+    /* Allow the page to scroll so that it can shrink when the keyboard is open */
     html, body {
       height: 100%;
       margin: 0;
-      overflow: hidden;
+      overflow-y: auto;
     }
-    /* Main container for the app */
+    /* Main container with flexible height */
     .container {
-      width: 100%;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-evenly;
+      justify-content: space-between;
       box-sizing: border-box;
       padding: 10px;
     }
@@ -44,7 +43,7 @@
       gap: 0.5rem;
       justify-content: center;
     }
-    /* Group each word so that its letters stay together */
+    /* Group letters of each word together */
     .word-container {
       display: inline-flex;
       white-space: nowrap;
@@ -72,12 +71,13 @@
       font-size: 1.2rem;
       text-transform: uppercase;
     }
-    /* Default button group styling */
+    /* Button group in normal flow */
     .button-group {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       justify-content: center;
+      width: 100%;
     }
     button {
       padding: 0.5rem 1rem;
@@ -104,22 +104,17 @@
       text-transform: uppercase;
       margin: 10px;
     }
-    /* For mobile, reposition the button group so it's fixed at the top */
+    /* Mobile adjustments */
     @media (max-width: 600px) {
+      /* Make the button group sticky at the top so it's always visible */
       .button-group {
-        position: fixed;
-        top: 70px;
-        left: 0;
-        right: 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
         background: #f4f4f8;
         padding: 5px;
-        z-index: 1000;
-        justify-content: space-around;
       }
-      /* Add extra top margin so input area doesn't get hidden */
-      #inputArea {
-        margin-top: 130px;
-      }
+      /* Reduce sizes */
       .char-box {
         width: 2rem;
         height: 2rem;
@@ -148,7 +143,7 @@
     <div id="cipher">🔒 Press Play to start</div>
     <div id="inputArea"></div>
     <div id="timer">⏱️ 0s</div>
-    <!-- Button group. On mobile, this group is fixed at the top -->
+    <!-- Button group; on mobile, this is sticky at the top -->
     <div class="button-group">
       <button id="playBtn">Play</button>
       <button id="hint" style="display:none;">Hint (-0 pts)</button>
@@ -347,14 +342,14 @@
           input.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
           });
-          // When an input is manually focused, clear its existing value.
+          // Clear the existing value when manually focused.
           input.addEventListener('focus', function() {
             this.value = "";
           });
           wordContainer.appendChild(input);
         });
         inputArea.appendChild(wordContainer);
-        if (wordIndex < words.length - 1) {
+        if(wordIndex < words.length - 1) {
           const spacer = document.createElement('div');
           spacer.className = "word-space";
           inputArea.appendChild(spacer);
