@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CipherSnap</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f4f4f8;
+      transition: background 0.3s ease;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      text-transform: uppercase;
+    }
+    #cipher {
+      font-size: 1.5rem;
+      margin: 1rem 0;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s ease;
+      text-transform: uppercase;
+    }
+    #inputArea {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    /* Each word is grouped into a container that won’t break mid-word */
+    .word-container {
+      display: inline-flex;
+      white-space: nowrap;
+    }
+    /* Spacer between word containers */
+    .word-space {
+      width: 1rem;
+    }
+    .char-box {
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1.5rem;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      text-transform: uppercase;
+    }
+    .char-box:focus {
+      background-color: #e0f7fa;
+      outline: none;
+      transform: scale(1.05);
+    }
+    #timer {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+    }
+    button {
+      margin: 1rem 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      text-transform: uppercase;
+    }
+    button:hover:not(:disabled) {
+      background: #0056b3;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    #endMessage {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+      text-align: center;
+      white-space: pre-line;
+      text-transform: uppercase;
+    }
+    /* Ensure all play-area text is uppercase */
+    #hint, #defineBtn, #revealBtn, #checkBtn {
+      text-transform: uppercase;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .char-box {
+        width: 2rem;
+        height: 2rem;
+        font-size: 1.2rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>CipherSnap</h1>
+  <div id="cipher">🔒 Press Play to start</div>
+  <div id="inputArea"></div>
+  <div id="timer">⏱️ 0s</div>
+  <button id="playBtn">Play</button>
+  <button id="hint" style="display:none;">Hint (-0 pts)</button>
+  <button id="defineBtn" style="display:none;">Define Cipher (-20% score)</button>
+  <button id="revealBtn" style="display:none;">Reveal Answer</button>
+  <button id="checkBtn" style="display:none;" disabled>Check Letters</button>
+  <div id="endMessage"></div>
+  <button id="shareBtn" style="display:none;">📤 Share</button>
+
+  <script>
+    const devMode = window.location.search.includes('dev');
+
+    // Updated cipher pool with corrected cipher texts.
+    const cipherPool = [
+      { id: 1, cipherText: "Khoor", solution: "HELLO", cipherType: "Caesar (+3)", difficulty: "easy", plainClue: "A common greeting with a simple shift." },
+      { id: 2, cipherText: "Svool", solution: "HELLO", cipherType: "Atbash", difficulty: "easy", plainClue: "The alphabet is mirrored in this cipher." },
+      { id: 3, cipherText: ".... . .-.. .-.. ---", solution: "HELLO", cipherType: "Morse", difficulty: "easy", plainClue: "Dots and dashes conceal a greeting." },
+      { id: 4, cipherText: "URYYB", solution: "HELLO", cipherType: "ROT13", difficulty: "easy", plainClue: "A 13-letter rotation hides the message." },
+      { id: 5, cipherText: "Mjqqt Btwqi", solution: "HELLO WORLD", cipherType: "Caesar (+5)", difficulty: "medium", plainClue: "A shifted two-word greeting." },
+      { id: 6, cipherText: "GSV XZPV RH Z ORV", solution: "THE CAKE IS A LIE", cipherType: "Atbash", difficulty: "medium", plainClue: "A notorious phrase from gaming lore." },
+      { id: 7, cipherText: "Uifsf jt op tqppo", solution: "THERE IS NO SPOON", cipherType: "Caesar (+1)", difficulty: "medium", plainClue: "A mind-bending statement with a small shift." }
+    ];
+
+    // Select today's cipher from the pool.
+    const cipher = cipherPool[new Date().getDate() % cipherPool.length];
+
+    // DOM element references.
+    const cipherDisplay = document.getElementById("cipher");
+    const inputArea = document.getElementById("inputArea");
+    const timerDisplay = document.getElementById("timer");
+    const playBtn = document.getElementById("playBtn");
+    const hintBtn = document.getElementById("hint");
+    const defineBtn = document.getElementById("defineBtn");
+    const revealBtn = document.getElementById("revealBtn");
+    const checkBtn = document.getElementById("checkBtn");
+    const endMessage = document.getElementById("endMessage");
+    const shareBtn = document.getElementById("shareBtn");
+
+    let startTime = null;
+    let timerInterval;
+    let hintCount = 0;
+    let totalPenalty = 0;
+    let lastLetterHintTime = 0;
+    let definitionUsed = false;
+
+    // Prevent multiple plays per day.
+    const alreadyPlayed = localStorage.getItem("cipherPlayed") === new Date().toDateString();
+    if (alreadyPlayed && !devMode) {
+      cipherDisplay.innerText = "Come back tomorrow for a new cipher!";
+      playBtn.style.display = "none";
+    }
+
+    playBtn.addEventListener("click", startGame);
+
+    // Hint button behavior.
+    hintBtn.addEventListener("click", () => {
+      if (hintCount === 0) {
+        // First hint: provide a plain-text clue.
+        alert(`Clue: ${cipher.plainClue.toUpperCase()}`);
+        totalPenalty += 20;
+      } else {
+        // Subsequent hints: fill in a random missing letter (5-second delay enforced).
+        const now = Date.now();
+        if (now - lastLetterHintTime < 5000) {
+          alert("Please wait 5 seconds before requesting another letter hint.");
+          return;
+        }
+        lastLetterHintTime = now;
+        totalPenalty += 30;
+        const inputs = document.querySelectorAll(".char-box");
+        const emptyIndexes = [];
+        inputs.forEach((input, index) => {
+          if (!input.value) emptyIndexes.push(index);
+        });
+        if (emptyIndexes.length === 0) {
+          alert("All letters have been filled in!");
+        } else {
+          const randIndex = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+          const solutionNoSpaces = cipher.solution.replace(/ /g, '');
+          inputs[randIndex].value = solutionNoSpaces[randIndex];
+        }
+      }
+      hintCount++;
+      hintBtn.innerText = `Hint (-${totalPenalty} pts)`;
+    });
+
+    // "Define Cipher" button behavior.
+    defineBtn.addEventListener("click", () => {
+      let definition = "";
+      if (cipher.cipherType.includes("Caesar")) {
+        definition = "Caesar Cipher: Shifts letters by a fixed number of positions.";
+      } else if (cipher.cipherType.includes("Atbash")) {
+        definition = "Atbash Cipher: Substitutes each letter with its opposite in the alphabet.";
+      } else if (cipher.cipherType.includes("Morse")) {
+        definition = "Morse Code: Uses dots and dashes to represent letters.";
+      } else if (cipher.cipherType.includes("ROT13")) {
+        definition = "ROT13: A Caesar cipher with a shift of 13.";
+      } else {
+        definition = "This is a substitution cipher.";
+      }
+      alert(`Definition: ${definition.toUpperCase()}`);
+      definitionUsed = true;
+      // Disable to avoid repeated penalty.
+      defineBtn.disabled = true;
+    });
+
+    // "Reveal Answer" button behavior.
+    revealBtn.addEventListener("click", () => {
+      alert(`The answer is: ${cipher.solution.toUpperCase()}`);
+      endGame(true, 0, true);
+    });
+
+    // "Check Letters" button behavior.
+    checkBtn.addEventListener("click", revealLetterStatus);
+
+    // Enable/disable Check Letters button based on whether any letter is entered.
+    function updateCheckBtnState() {
+      const inputs = document.querySelectorAll(".char-box");
+      let anyEntered = false;
+      inputs.forEach(input => {
+        if (input.value.trim() !== "") {
+          anyEntered = true;
+        }
+      });
+      checkBtn.disabled = !anyEntered;
+    }
+
+    function revealLetterStatus() {
+      const inputs = document.querySelectorAll(".char-box");
+      const solutionNoSpaces = cipher.solution.replace(/ /g, '');
+      // Highlight each letter.
+      inputs.forEach((input, index) => {
+        if (input.value.trim() !== "") {
+          if (input.value.toUpperCase() === solutionNoSpaces[index]) {
+            input.style.backgroundColor = "lightgreen";
+          } else {
+            input.style.backgroundColor = "salmon";
+          }
+        }
+      });
+      // Disable button and start 5-second countdown.
+      checkBtn.disabled = true;
+      let countdown = 5;
+      checkBtn.innerText = `Revealing: ${countdown}`;
+      const intervalId = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          checkBtn.innerText = `Revealing: ${countdown}`;
+        } else {
+          clearInterval(intervalId);
+          // Remove highlight styling.
+          inputs.forEach(input => {
+            input.style.backgroundColor = "";
+          });
+          checkBtn.innerText = "Check Letters";
+          updateCheckBtnState();
+        }
+      }, 1000);
+    }
+
+    function startGame() {
+      // Display the cipher text normally (browser handles line breaks).
+      cipherDisplay.innerText = cipher.cipherText;
+
+      // Clear and build the input area by grouping each word.
+      inputArea.innerHTML = "";
+      hintBtn.style.display = "inline-block";
+      defineBtn.style.display = "inline-block";
+      revealBtn.style.display = "inline-block";
+      checkBtn.style.display = "inline-block";
+      // Reset hint and definition state.
+      hintBtn.disabled = false;
+      hintBtn.innerText = "Hint (-0 pts)";
+      defineBtn.disabled = false;
+      defineBtn.innerText = "Define Cipher (-20% score)";
+      checkBtn.innerText = "Check Letters";
+      hintCount = 0;
+      totalPenalty = 0;
+      lastLetterHintTime = 0;
+      definitionUsed = false;
+      endMessage.innerText = "";
+
+      // Group letters by word so each word stays intact.
+      const words = cipher.solution.split(' ');
+      words.forEach((word, wordIndex) => {
+        const wordContainer = document.createElement('div');
+        wordContainer.className = "word-container";
+        // Create an input box for each letter.
+        word.split('').forEach(letter => {
+          const input = document.createElement('input');
+          input.maxLength = 1;
+          input.className = 'char-box';
+          input.setAttribute('aria-label', 'Letter');
+          // Force uppercase on entry.
+          input.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+          });
+          wordContainer.appendChild(input);
+        });
+        inputArea.appendChild(wordContainer);
+        // Append a spacer between words, except after the last one.
+        if(wordIndex < words.length - 1) {
+          const spacer = document.createElement('div');
+          spacer.className = "word-space";
+          inputArea.appendChild(spacer);
+        }
+      });
+
+      // Add event listeners to each input to check answer on entry and update the Check Letters button state.
+      const inputs = document.querySelectorAll(".char-box");
+      inputs.forEach((input, i) => {
+        input.addEventListener('input', () => {
+          if (i < inputs.length - 1) inputs[i + 1].focus();
+          checkAnswer(inputs);
+          updateCheckBtnState();
+        });
+      });
+
+      inputs[0]?.focus();
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 100);
+    }
+
+    // Timer updates the elapsed time (used for score calculation).
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      timerDisplay.innerText = `⏱️ ${elapsed}s`;
+    }
+
+    // Check if the entered answer (ignoring spaces) is correct.
+    function checkAnswer(inputs) {
+      const userAnswer = Array.from(inputs)
+        .map(input => input.value.toUpperCase())
+        .join("");
+      if (userAnswer === cipher.solution.replace(/ /g, '')) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        let score = Math.max(100 - elapsed - totalPenalty, 0);
+        if (definitionUsed) score = Math.floor(score * 0.8);
+        endGame(true, score);
+      }
+    }
+
+    // End game: win indicates if the user finished (true) or gave up (false),
+    // giveUp parameter forces the final score to 0.
+    function endGame(win, score, giveUp = false) {
+      clearInterval(timerInterval);
+      hintBtn.style.display = "none";
+      defineBtn.style.display = "none";
+      revealBtn.style.display = "none";
+      checkBtn.style.display = "none";
+      playBtn.style.display = "none";
+      if (!devMode) localStorage.setItem("cipherPlayed", new Date().toDateString());
+      if (giveUp) score = 0;
+      if (win) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const hintsUsed = (hintCount > 0 || definitionUsed) ? "YES" : "NO";
+        endMessage.innerText = `🎉 YOU WIN! SCORE: ${score}\nTIME: ${elapsed} SECONDS\nHINTS USED: ${hintsUsed}`;
+      } else {
+        endMessage.innerText = `GAME OVER! THE ANSWER WAS: ${cipher.solution.toUpperCase()}`;
+      }
+      shareBtn.style.display = "inline-block";
+      shareBtn.onclick = () => {
+        const shareText = `I just ${win ? `scored ${score}` : `gave up`} on CipherSnap! Try today's puzzle: http://redface.matthew-d-miller.com/ciphersnap.html`;
+        navigator.clipboard.writeText(shareText).then(() => {
+          alert("Copied to clipboard!");
+        });
+      };
+    }
+  </script>
+</body>
+</html>
