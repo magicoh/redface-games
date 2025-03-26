@@ -5,26 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CipherSnap</title>
   <style>
-    /* Allow the page to scroll so that it can shrink when the keyboard is open */
+    /* Basic reset */
     html, body {
-      height: 100%;
       margin: 0;
+      padding: 0;
+      height: 100%;
       overflow-y: auto;
     }
-    /* Main container with flexible height */
+    /* Main scrollable content */
     .container {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
       box-sizing: border-box;
       padding: 10px;
+      padding-bottom: 90px; /* leave room for the fixed footer */
     }
     h1 {
       margin: 0;
       font-size: 2rem;
       text-transform: uppercase;
+      text-align: center;
     }
     #cipher {
       font-size: 1.5rem;
@@ -35,6 +33,7 @@
       text-align: center;
       text-transform: uppercase;
       max-width: 90%;
+      margin: 10px auto;
       word-wrap: break-word;
     }
     #inputArea {
@@ -42,8 +41,9 @@
       flex-wrap: wrap;
       gap: 0.5rem;
       justify-content: center;
+      margin: 10px auto;
     }
-    /* Group letters of each word together */
+    /* Group letters of each word together so they never break mid-word */
     .word-container {
       display: inline-flex;
       white-space: nowrap;
@@ -70,14 +70,34 @@
     #timer {
       font-size: 1.2rem;
       text-transform: uppercase;
+      text-align: center;
+      margin: 10px 0;
     }
-    /* Button group in normal flow */
+    #endMessage {
+      font-size: 1.2rem;
+      text-align: center;
+      white-space: pre-line;
+      text-transform: uppercase;
+      margin: 10px;
+    }
+    /* Fixed footer for controls */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #f4f4f8;
+      padding: 10px;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      z-index: 1000;
+    }
     .button-group {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       justify-content: center;
-      width: 100%;
     }
     button {
       padding: 0.5rem 1rem;
@@ -97,24 +117,8 @@
       background: #aaa;
       cursor: not-allowed;
     }
-    #endMessage {
-      font-size: 1.2rem;
-      text-align: center;
-      white-space: pre-line;
-      text-transform: uppercase;
-      margin: 10px;
-    }
-    /* Mobile adjustments */
+    /* Responsive adjustments for smaller screens */
     @media (max-width: 600px) {
-      /* Make the button group sticky at the top so it's always visible */
-      .button-group {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: #f4f4f8;
-        padding: 5px;
-      }
-      /* Reduce sizes */
       .char-box {
         width: 2rem;
         height: 2rem;
@@ -143,7 +147,11 @@
     <div id="cipher">🔒 Press Play to start</div>
     <div id="inputArea"></div>
     <div id="timer">⏱️ 0s</div>
-    <!-- Button group; on mobile, this is sticky at the top -->
+    <div id="endMessage"></div>
+    <button id="shareBtn" style="display:none;">📤 Share</button>
+  </div>
+  <!-- Fixed footer for controls -->
+  <div class="footer">
     <div class="button-group">
       <button id="playBtn">Play</button>
       <button id="hint" style="display:none;">Hint (-0 pts)</button>
@@ -151,8 +159,6 @@
       <button id="revealBtn" style="display:none;">Reveal Answer</button>
       <button id="checkBtn" style="display:none;" disabled>Check Letters</button>
     </div>
-    <div id="endMessage"></div>
-    <button id="shareBtn" style="display:none;">📤 Share</button>
   </div>
 
   <script>
@@ -342,14 +348,14 @@
           input.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
           });
-          // Clear the existing value when manually focused.
+          // When an input is manually focused, clear its value.
           input.addEventListener('focus', function() {
             this.value = "";
           });
           wordContainer.appendChild(input);
         });
         inputArea.appendChild(wordContainer);
-        if(wordIndex < words.length - 1) {
+        if (wordIndex < words.length - 1) {
           const spacer = document.createElement('div');
           spacer.className = "word-space";
           inputArea.appendChild(spacer);
