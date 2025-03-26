@@ -5,30 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CipherSnap</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 2rem;
+    /* Ensure the page occupies the full viewport without scrolling */
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    /* Container for the entire app */
+    .container {
+      width: 100%;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: #f4f4f8;
-      transition: background 0.3s ease;
+      justify-content: space-evenly;
+      box-sizing: border-box;
+      padding: 10px;
     }
     h1 {
-      margin-bottom: 1rem;
+      margin: 0;
       font-size: 2rem;
       text-transform: uppercase;
     }
     #cipher {
       font-size: 1.5rem;
-      margin: 1rem 0;
       background: #fff;
       padding: 1rem;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       text-align: center;
-      transition: transform 0.3s ease;
       text-transform: uppercase;
+      max-width: 90%;
+      word-wrap: break-word;
     }
     #inputArea {
       display: flex;
@@ -36,12 +44,11 @@
       gap: 0.5rem;
       justify-content: center;
     }
-    /* Each word is grouped into a container that won’t break mid-word */
+    /* Group letters into word containers that don’t break mid-word */
     .word-container {
       display: inline-flex;
       white-space: nowrap;
     }
-    /* Spacer between word containers */
     .word-space {
       width: 1rem;
     }
@@ -62,12 +69,17 @@
       transform: scale(1.05);
     }
     #timer {
-      margin-top: 1rem;
       font-size: 1.2rem;
       text-transform: uppercase;
     }
+    /* Group buttons in a flex container */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
     button {
-      margin: 1rem 0.5rem;
       padding: 0.5rem 1rem;
       font-size: 1rem;
       border: none;
@@ -87,16 +99,12 @@
     }
     #endMessage {
       font-size: 1.2rem;
-      margin-top: 1rem;
       text-align: center;
       white-space: pre-line;
       text-transform: uppercase;
+      margin: 10px;
     }
-    /* Ensure all play-area text is uppercase */
-    #hint, #defineBtn, #revealBtn, #checkBtn {
-      text-transform: uppercase;
-    }
-    /* Responsive adjustments */
+    /* Responsive adjustments for smaller screens */
     @media (max-width: 600px) {
       .char-box {
         width: 2rem;
@@ -106,21 +114,36 @@
       h1 {
         font-size: 1.75rem;
       }
+      #cipher {
+        font-size: 1.3rem;
+        padding: 0.5rem;
+      }
+      button {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+      }
+      #timer, #endMessage {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>CipherSnap</h1>
-  <div id="cipher">🔒 Press Play to start</div>
-  <div id="inputArea"></div>
-  <div id="timer">⏱️ 0s</div>
-  <button id="playBtn">Play</button>
-  <button id="hint" style="display:none;">Hint (-0 pts)</button>
-  <button id="defineBtn" style="display:none;">Define Cipher (-20% score)</button>
-  <button id="revealBtn" style="display:none;">Reveal Answer</button>
-  <button id="checkBtn" style="display:none;" disabled>Check Letters</button>
-  <div id="endMessage"></div>
-  <button id="shareBtn" style="display:none;">📤 Share</button>
+  <div class="container">
+    <h1>CipherSnap</h1>
+    <div id="cipher">🔒 Press Play to start</div>
+    <div id="inputArea"></div>
+    <div id="timer">⏱️ 0s</div>
+    <div class="button-group">
+      <button id="playBtn">Play</button>
+      <button id="hint" style="display:none;">Hint (-0 pts)</button>
+      <button id="defineBtn" style="display:none;">Define Cipher (-20% score)</button>
+      <button id="revealBtn" style="display:none;">Reveal Answer</button>
+      <button id="checkBtn" style="display:none;" disabled>Check Letters</button>
+    </div>
+    <div id="endMessage"></div>
+    <button id="shareBtn" style="display:none;">📤 Share</button>
+  </div>
 
   <script>
     const devMode = window.location.search.includes('dev');
@@ -274,16 +297,16 @@
     }
 
     function startGame() {
-      // Display the cipher text normally (browser handles line breaks).
+      // Display the cipher text normally (letting the browser handle line-breaks).
       cipherDisplay.innerText = cipher.cipherText;
 
-      // Clear and build the input area by grouping each word.
+      // Build the input area by grouping letters by word.
       inputArea.innerHTML = "";
       hintBtn.style.display = "inline-block";
       defineBtn.style.display = "inline-block";
       revealBtn.style.display = "inline-block";
       checkBtn.style.display = "inline-block";
-      // Reset hint and definition state.
+      // Reset state.
       hintBtn.disabled = false;
       hintBtn.innerText = "Hint (-0 pts)";
       defineBtn.disabled = false;
@@ -295,25 +318,22 @@
       definitionUsed = false;
       endMessage.innerText = "";
 
-      // Group letters by word so each word stays intact.
+      // Split solution into words and group input boxes per word.
       const words = cipher.solution.split(' ');
       words.forEach((word, wordIndex) => {
         const wordContainer = document.createElement('div');
         wordContainer.className = "word-container";
-        // Create an input box for each letter.
         word.split('').forEach(letter => {
           const input = document.createElement('input');
           input.maxLength = 1;
           input.className = 'char-box';
           input.setAttribute('aria-label', 'Letter');
-          // Force uppercase on entry.
           input.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
           });
           wordContainer.appendChild(input);
         });
         inputArea.appendChild(wordContainer);
-        // Append a spacer between words, except after the last one.
         if(wordIndex < words.length - 1) {
           const spacer = document.createElement('div');
           spacer.className = "word-space";
@@ -321,7 +341,7 @@
         }
       });
 
-      // Add event listeners to each input to check answer on entry and update the Check Letters button state.
+      // Add event listeners to each input.
       const inputs = document.querySelectorAll(".char-box");
       inputs.forEach((input, i) => {
         input.addEventListener('input', () => {
@@ -355,8 +375,8 @@
       }
     }
 
-    // End game: win indicates if the user finished (true) or gave up (false),
-    // giveUp parameter forces the final score to 0.
+    // End game: win indicates if the user finished (true) or gave up (false).
+    // The giveUp parameter forces the final score to 0.
     function endGame(win, score, giveUp = false) {
       clearInterval(timerInterval);
       hintBtn.style.display = "none";
