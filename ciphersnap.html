@@ -93,7 +93,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
-      margin: 20px 0; /* extra vertical spacing */
+      margin: 20px 0;
       justify-content: center;
     }
     button {
@@ -225,129 +225,130 @@
     const devMode = urlParams.has("dev");
     let selectedCipherIndex = urlParams.has("cipher") ? parseInt(urlParams.get("cipher")) : null;
 
-    // Updated cipher pool with three clues per puzzle.
+    // New cipher pool with 10 ciphers (no Morse).
     const cipherPool = [
-  {
-    id: 1,
-    cipherText: "JRRG PRUQLQJ",
-    solution: "GOOD MORNING",
-    cipherType: "Caesar (+3)",
-    difficulty: "easy",
-    clues: [
-      "It's a common greeting in the morning.",
-      "Shift each letter three places forward.",
-      "The solution starts with G."
-    ]
-  },
-  {
-    id: 2,
-    cipherText: "HVXIVG XLWV",
-    solution: "SECRET CODE",
-    cipherType: "Atbash",
-    difficulty: "easy",
-    clues: [
-      "Opposite letters reveal the message.",
-      "The alphabet is reversed.",
-      "The solution consists of two words: a secret and a code."
-    ]
-  },
-  {
-    id: 3,
-    cipherText: "ORFG BS YHPX",
-    solution: "BEST OF LUCK",
-    cipherType: "ROT13",
-    difficulty: "easy",
-    clues: [
-      "A wish for success, rotated by 13 letters.",
-      "Half the alphabet shift transforms the phrase.",
-      "The solution is a common phrase for wishing success."
-    ]
-  },
-  {
-    id: 4,
-    cipherText: "FYNNW ZGPRFBYW",
-    solution: "HAPPY BIRTHDAY",
-    cipherType: "Caesar (-2)",
-    difficulty: "medium",
-    clues: [
-      "A celebration message, shifted backwards by 2.",
-      "Letters rotate backward.",
-      "Often sung at parties."
-    ]
-  },
-  {
-    id: 5,
-    cipherText: "JSOTD DTZW IFD",
-    solution: "ENJOY YOUR DAY",
-    cipherType: "Caesar (+5)",
-    difficulty: "easy",
-    clues: [
-      "A cheerful message with a shift of five.",
-      "Add five to each letter to decode.",
-      "The solution encourages you to have a good day."
-    ]
-  },
-  {
-    id: 6,
-    cipherText: "PVVK XZON ZMW XZIIB LM",
-    solution: "KEEP CALM AND CARRY ON",
-    cipherType: "Atbash",
-    difficulty: "easy",
-    clues: [
-      "A motivational phrase encoded with reversed alphabets.",
-      "Think opposites in the alphabet.",
-      "A famous poster slogan."
-    ]
-  },
-  {
-    id: 7,
-    cipherText: "FGNL CBFVGVIR",
-    solution: "STAY POSITIVE",
-    cipherType: "ROT13",
-    difficulty: "easy",
-    clues: [
-      "An uplifting message rotated by 13.",
-      "A common phrase to keep your spirits up.",
-      "Maintain optimism."
-    ]
-  },
-  {
-    id: 8,
-    cipherText: "ASVO LEVH TPEC LEVH",
-    solution: "WORK HARD PLAY HARD",
-    cipherType: "Caesar (+4)",
-    difficulty: "medium",
-    clues: [
-      "A motto for success with a positive spin.",
-      "Shift each letter forward by four.",
-      "The solution encourages both work and play."
-    ]
-  },
-  {
-    id: 9,
-    cipherText: "PEIA BHEAO MQEYGHU",
-    solution: "TIME FLIES QUICKLY",
-    cipherType: "Caesar (-4)",
-    difficulty: "medium",
-    clues: [
-      "A reminder that moments pass fast, shifted backwards by 4.",
-      "Each letter is moved four positions back.",
-      "The solution is a common saying about time."
-    ]
-  },
-  {
-    id: 10,
-    cipherText: "ARIRE TVIR HC",
-    solution: "NEVER GIVE UP",
-    cipherType: "ROT13",
-    difficulty: "easy",
-    clues: [
-      "A motivational phrase rotated by 13.",
-      "An inspiring message encoded with ROT13.",
-      "The solution urges persistence."
-    ]
-  }
-];
+      {
+        id: 1,
+        cipherText: "JRRG PRUQLQJ",
+        solution: "GOOD MORNING",
+        cipherType: "Caesar (+3)",
+        difficulty: "easy",
+        clues: [
+          "It's a common greeting in the morning.",
+          "Shift each letter three places forward.",
+          "The solution starts with G."
+        ]
+      },
+      {
+        id: 2,
+        cipherText: "HVXIVG XLWV",
+        solution: "SECRET CODE",
+        cipherType: "Atbash",
+        difficulty: "easy",
+        clues: [
+          "Opposite letters reveal the message.",
+          "The alphabet is reversed.",
+          "The solution consists of two words: a secret and a code."
+        ]
+      },
+      {
+        id: 3,
+        cipherText: "ORFG BS YHPX",
+        solution: "BEST OF LUCK",
+        cipherType: "ROT13",
+        difficulty: "easy",
+        clues: [
+          "A wish for success, rotated by 13 letters.",
+          "Half the alphabet shift transforms the phrase.",
+          "The solution is a common phrase for wishing success."
+        ]
+      },
+      {
+        id: 4,
+        cipherText: "FYNNW ZGPRFBYW",
+        solution: "HAPPY BIRTHDAY",
+        cipherType: "Caesar (-2)",
+        difficulty: "medium",
+        clues: [
+          "A celebration message, shifted backwards by 2.",
+          "Letters rotate backward.",
+          "Often sung at parties."
+        ]
+      },
+      {
+        id: 5,
+        cipherText: "JSOTD DTZW IFD",
+        solution: "ENJOY YOUR DAY",
+        cipherType: "Caesar (+5)",
+        difficulty: "easy",
+        clues: [
+          "A cheerful message with a shift of five.",
+          "Add five to each letter to decode.",
+          "The solution encourages you to have a good day."
+        ]
+      },
+      {
+        id: 6,
+        cipherText: "PVVK XZON ZMW XZIIB LM",
+        solution: "KEEP CALM AND CARRY ON",
+        cipherType: "Atbash",
+        difficulty: "easy",
+        clues: [
+          "A motivational phrase encoded with reversed alphabets.",
+          "Think opposites in the alphabet.",
+          "A famous poster slogan."
+        ]
+      },
+      {
+        id: 7,
+        cipherText: "FGNL CBFVGVIR",
+        solution: "STAY POSITIVE",
+        cipherType: "ROT13",
+        difficulty: "easy",
+        clues: [
+          "An uplifting message rotated by 13.",
+          "A common phrase to keep your spirits up.",
+          "Maintain optimism."
+        ]
+      },
+      {
+        id: 8,
+        cipherText: "ASVO LEVH TPEC LEVH",
+        solution: "WORK HARD PLAY HARD",
+        cipherType: "Caesar (+4)",
+        difficulty: "medium",
+        clues: [
+          "A motto for success with a positive spin.",
+          "Shift each letter forward by four.",
+          "The solution encourages both work and play."
+        ]
+      },
+      {
+        id: 9,
+        cipherText: "PEIA BHEAO MQEYGHU",
+        solution: "TIME FLIES QUICKLY",
+        cipherType: "Caesar (-4)",
+        difficulty: "medium",
+        clues: [
+          "A reminder that moments pass fast, shifted backwards by 4.",
+          "Each letter is moved four positions back.",
+          "The solution is a common saying about time."
+        ]
+      },
+      {
+        id: 10,
+        cipherText: "ARIRE TVIR HC",
+        solution: "NEVER GIVE UP",
+        cipherType: "ROT13",
+        difficulty: "easy",
+        clues: [
+          "A motivational phrase rotated by 13.",
+          "An inspiring message encoded with ROT13.",
+          "The solution urges persistence."
+        ]
+      }
+    ];
+
     // Determine which cipher to load.
     let cipher;
     if (selectedCipherIndex !== null && !isNaN(selectedCipherIndex)) {
@@ -440,8 +441,6 @@
         definition = "Caesar Cipher: Shifts letters by a fixed number of positions.";
       } else if (cipher.cipherType.includes("Atbash")) {
         definition = "Atbash Cipher: Substitutes each letter with its opposite in the alphabet.";
-      } else if (cipher.cipherType.includes("Morse")) {
-        definition = "Morse Code: Uses dots and dashes to represent letters.";
       } else if (cipher.cipherType.includes("ROT13")) {
         definition = "ROT13: A Caesar cipher with a shift of 13.";
       } else {
@@ -583,7 +582,9 @@
     }
 
     function checkAnswer(inputs) {
-      const userAnswer = Array.from(inputs).map(input => input.value.toUpperCase()).join("");
+      const userAnswer = Array.from(inputs)
+        .map(input => input.value.toUpperCase())
+        .join("");
       if (userAnswer === cipher.solution.replace(/ /g, '')) {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         let score = Math.max(100 - elapsed - totalPenalty, 0);
@@ -605,23 +606,23 @@
       let elapsed = Math.floor((Date.now() - startTime) / 1000);
       let hintText = "";
       if (hintCount > 0 || definitionUsed || revealLetterUsed) {
-        hintText = `Used ${hintCount} hint${hintCount === 1 ? "" : "s"} and didn't know what ${cipher.cipherType} was.`;
+        hintText = `- Used ${hintCount} hint${hintCount === 1 ? "" : "s"} and didn't know what ${cipher.cipherType} was.`;
       } else {
-        hintText = `Used no hints.`;
+        hintText = `- Used no hints.`;
       }
       // Format ending message as bullet points.
       if (win) {
         endMessage.innerText = 
 `• SCORE: ${score} POINTS
 • TIME: ${elapsed} SECONDS
-• HINTS: ${hintCount}
+• HINTS USED: ${hintCount}
 • ${hintText}`;
       } else {
         endMessage.innerText = `GAME OVER! THE ANSWER WAS: ${cipher.solution.toUpperCase()}`;
       }
       // Set up Share button.
       shareBtn.style.display = "inline-block";
-      shareBtn.onclick = () => {
+      shareBtn.onclick = async () => {
         let shareText = "";
         if (hintCount > 0 || definitionUsed || revealLetterUsed) {
           shareText = `I didn't know what ${cipher.cipherType} was and needed ${hintCount} hint${hintCount === 1 ? "" : "s"} to solve CipherSnap!`;
@@ -629,9 +630,12 @@
           shareText = `I solved the ${cipher.cipherType} cipher on CipherSnap with no hints!`;
         }
         shareText += `\nTry today's puzzle: http://redface.matthew-d-miller.com/ciphersnap.html`;
-        navigator.clipboard.writeText(shareText).then(() => {
+        try {
+          await navigator.clipboard.writeText(shareText);
           shareBtn.innerText = "COPIED TO CLIPBOARD";
-        });
+        } catch (err) {
+          alert("Copy failed, please try manually.");
+        }
       };
     }
 
