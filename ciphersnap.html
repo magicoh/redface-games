@@ -227,22 +227,127 @@
 
     // Updated cipher pool with three clues per puzzle.
     const cipherPool = [
-      { id: 1, cipherText: "Khoor", solution: "HELLO", cipherType: "Caesar (+3)", difficulty: "easy",
-        clues: ["It's a common greeting", "It starts with H", "It ends with O"] },
-      { id: 2, cipherText: "Svool", solution: "HELLO", cipherType: "Atbash", difficulty: "easy",
-        clues: ["The alphabet is reversed", "Think mirror images", "Opposites rule"] },
-      { id: 3, cipherText: ".... . .-.. .-.. ---", solution: "HELLO", cipherType: "Morse", difficulty: "easy",
-        clues: ["Dots and dashes", "Listen carefully", "It spells a greeting"] },
-      { id: 4, cipherText: "URYYB", solution: "HELLO", cipherType: "ROT13", difficulty: "easy",
-        clues: ["Letters rotated", "13 is the magic number", "Try shifting halfway"] },
-      { id: 5, cipherText: "Mjqqt Btwqi", solution: "HELLO WORLD", cipherType: "Caesar (+5)", difficulty: "medium",
-        clues: ["A two-word greeting", "It’s global", "Shift by 5 reveals it"] },
-      { id: 6, cipherText: "GSV XZPV RH Z ORV", solution: "THE CAKE IS A LIE", cipherType: "Atbash", difficulty: "medium",
-        clues: ["A famous gaming phrase", "Not everything is as it seems", "Watch out for cake"] },
-      { id: 7, cipherText: "Uifsf jt op tqppo", solution: "THERE IS NO SPOON", cipherType: "Caesar (+1)", difficulty: "medium",
-        clues: ["A puzzling statement", "It challenges reality", "Remember the movie"] }
-    ];
-
+  {
+    id: 1,
+    cipherText: "JRRG PRUQLQJ",
+    solution: "GOOD MORNING",
+    cipherType: "Caesar (+3)",
+    difficulty: "easy",
+    clues: [
+      "It's a common greeting in the morning.",
+      "Shift each letter three places forward.",
+      "The solution starts with G."
+    ]
+  },
+  {
+    id: 2,
+    cipherText: "HVXIVG XLWV",
+    solution: "SECRET CODE",
+    cipherType: "Atbash",
+    difficulty: "easy",
+    clues: [
+      "Opposite letters reveal the message.",
+      "The alphabet is reversed.",
+      "The solution consists of two words: a secret and a code."
+    ]
+  },
+  {
+    id: 3,
+    cipherText: "ORFG BS YHPX",
+    solution: "BEST OF LUCK",
+    cipherType: "ROT13",
+    difficulty: "easy",
+    clues: [
+      "A wish for success, rotated by 13 letters.",
+      "Half the alphabet shift transforms the phrase.",
+      "The solution is a common phrase for wishing success."
+    ]
+  },
+  {
+    id: 4,
+    cipherText: "FYNNW ZGPRFBYW",
+    solution: "HAPPY BIRTHDAY",
+    cipherType: "Caesar (-2)",
+    difficulty: "medium",
+    clues: [
+      "A celebration message, shifted backwards by 2.",
+      "Letters rotate backward.",
+      "Often sung at parties."
+    ]
+  },
+  {
+    id: 5,
+    cipherText: "JSOTD DTZW IFD",
+    solution: "ENJOY YOUR DAY",
+    cipherType: "Caesar (+5)",
+    difficulty: "easy",
+    clues: [
+      "A cheerful message with a shift of five.",
+      "Add five to each letter to decode.",
+      "The solution encourages you to have a good day."
+    ]
+  },
+  {
+    id: 6,
+    cipherText: "PVVK XZON ZMW XZIIB LM",
+    solution: "KEEP CALM AND CARRY ON",
+    cipherType: "Atbash",
+    difficulty: "easy",
+    clues: [
+      "A motivational phrase encoded with reversed alphabets.",
+      "Think opposites in the alphabet.",
+      "A famous poster slogan."
+    ]
+  },
+  {
+    id: 7,
+    cipherText: "FGNL CBFVGVIR",
+    solution: "STAY POSITIVE",
+    cipherType: "ROT13",
+    difficulty: "easy",
+    clues: [
+      "An uplifting message rotated by 13.",
+      "A common phrase to keep your spirits up.",
+      "Maintain optimism."
+    ]
+  },
+  {
+    id: 8,
+    cipherText: "ASVO LEVH TPEC LEVH",
+    solution: "WORK HARD PLAY HARD",
+    cipherType: "Caesar (+4)",
+    difficulty: "medium",
+    clues: [
+      "A motto for success with a positive spin.",
+      "Shift each letter forward by four.",
+      "The solution encourages both work and play."
+    ]
+  },
+  {
+    id: 9,
+    cipherText: "PEIA BHEAO MQEYGHU",
+    solution: "TIME FLIES QUICKLY",
+    cipherType: "Caesar (-4)",
+    difficulty: "medium",
+    clues: [
+      "A reminder that moments pass fast, shifted backwards by 4.",
+      "Each letter is moved four positions back.",
+      "The solution is a common saying about time."
+    ]
+  },
+  {
+    id: 10,
+    cipherText: "ARIRE TVIR HC",
+    solution: "NEVER GIVE UP",
+    cipherType: "ROT13",
+    difficulty: "easy",
+    clues: [
+      "A motivational phrase rotated by 13.",
+      "An inspiring message encoded with ROT13.",
+      "The solution urges persistence."
+    ]
+  }
+];
     // Determine which cipher to load.
     let cipher;
     if (selectedCipherIndex !== null && !isNaN(selectedCipherIndex)) {
